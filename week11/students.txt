@@ -1,5 +1,6 @@
 John Lennon,20,80
 Paul McCartney,21,75
 George Harrison,19,85
-Ringo Starr,20,90
-Pete Best,19,70
+Ringo Starr,20,50
+Pete Best,19,75
+Barrack Obama,22,80

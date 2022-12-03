@@ -1,27 +1,32 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox as msgbox
+from tkinter import filedialog
 
 ##### LOAD DATA #####
 students = []
 def load_data():
-    students = [('John Lennon', 20, 80),
-                ('Paul McCartney', 21, 75),
-                ('George Harrison', 19, 85),
-                ('Ringo Starr', 20, 90),
-                ('Pete Best', 19, 70),
-                ('Stuart Sutcliffe', 18, 60),
-                ('Andy White', 20, 65),
-                ('Richard Starkey', 20, 80),
-                ('Ravi Shankar', 20, 90),
-                ('George Martin', 20, 80)]
-
-    return students
+    # open file dialog
+    filename = filedialog.askopenfilename(title="Open", filetypes=[("Text Files", "*.txt")])
+    with open(filename, "r") as f:
+        for line in f.readlines():
+            name, age, grade = line.strip().split(",")
+            students.append((name, int(age), int(grade)))
+    fill_data()
 
 def fill_data():
     for i in range(len(students)):
         lstStudents.insert(END, students[i][0])
 
+def btnSave_clicked():
+    # open file dialog to save
+    filename = filedialog.asksaveasfilename(title="Save", filetypes=[("Text Files", "*.txt")])
+    with open(filename, "w") as f:
+        for student in students:
+            # write student info to file
+            f.write("{},{},{}\n".format(student[0], student[1], student[2]))
+        f.close()
+    msgbox.showinfo("Save", "Data saved successfully!", parent=window, icon="info")
 
 ##### CREATE WINDOW #####
 window = Tk()
@@ -45,29 +50,37 @@ def lstStudents_select(event):
 
 def btnAdd_clicked():
     name = txtName.get()
-    age = int(txtAge.get())
-    grade = int(txtGrade.get())
-    students.append((name, age, grade))         # add to list students
-    lstStudents.insert(END, name)               # add to listbox lstStudents
-    msgbox.showinfo("Add Student", "Student added successfully!", parent=window, icon="info")
+    try:
+        age = int(txtAge.get())
+        grade = int(txtGrade.get())
+        students.append((name, age, grade))         # add to list students
+        lstStudents.insert(END, name)               # add to listbox lstStudents
+        msgbox.showinfo("Add Student", "Student added successfully!", parent=window, icon="info")
+    except ValueError:
+        msgbox.showerror("Add Student Error", "Invalid age or grade!", parent=window, icon="error")
+
 def is_selected(title, message):
     current_selection = lstStudents.curselection()
     if len(current_selection) == 0:  # no selection
         msgbox.showerror(title, message, parent=window, icon="error")
         return False
     return True
+
 def btnEdit_clicked():
     if not is_selected("Edit Student", "Please select a student to edit."):
         return
 
     index = lstStudents.curselection()[0]
     name = txtName.get()
-    age = int(txtAge.get())
-    grade = int(txtGrade.get())
-    students[index] = (name, age, grade)        # update list students
-    lstStudents.delete(index)                   # delete from listbox lstStudents
-    lstStudents.insert(index, name)             # add to listbox lstStudents
-    msgbox.showinfo("Edit Student", "Student edited successfully!", parent=window, icon="info")
+    try:
+        age = int(txtAge.get())
+        grade = int(txtGrade.get())
+        students[index] = (name, age, grade)        # update list students
+        lstStudents.delete(index)                   # delete from listbox lstStudents
+        lstStudents.insert(index, name)             # add to listbox lstStudents
+        msgbox.showinfo("Edit Student", "Student edited successfully!", parent=window, icon="info")
+    except ValueError:
+        msgbox.showerror("Edit Student Error", "Invalid age or grade!", parent=window, icon="error")
 
 def btnDelete_clicked():
     if not is_selected("Delete Student", "Please select a student to delete."):
@@ -116,11 +129,10 @@ btnDelete.grid(column=4, row=4, sticky='w', padx=3)
 btnLoad = Button(window, text="Load", command=load_data)
 btnLoad.grid(column=0, row=5, sticky='w', padx=3, pady=10)
 
-btnSave = Button(window, text="Save", command=fill_data)
+btnSave = Button(window, text="Save", command=btnSave_clicked)
 btnSave.grid(column=0, row=6, sticky='w', padx=3, pady=3)
 
 
 ##### START PROGRAM #####
-students = load_data()
 fill_data()
 window.mainloop()
